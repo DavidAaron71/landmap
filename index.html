@@ -1,116 +1,111 @@
 <!DOCTYPE html>
 <html lang="uk">
 <head>
-  <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Карта перевірених ділянок</title>
-  <link
-    rel="stylesheet"
-    href="https://unpkg.com/leaflet@1.9.4/dist/leaflet.css"
-    integrity="sha256-sA+4J1Rz6Z7rJbE4wM9xfRVTtZYkzYH4DIXP1B+/1Lk="
-    crossorigin=""
-  />
-  <style>
-    html, body { margin: 0; padding: 0; font-family: sans-serif; }
-    #map { height: 100vh; width: 100vw; }
-    .top-bar {
-      display: flex;
-      align-items: center;
-      background: linear-gradient(to right, #0057b7, #78d64b);
-      padding: 10px;
-      gap: 10px;
-      font-size: 18px;
-      color: white;
-      font-weight: bold;
-    }
-    .top-bar .icon {
-      width: 26px;
-      height: 26px;
-      object-fit: contain;
-      vertical-align: middle;
-    }
-    .headline {
-      background: linear-gradient(to right, #6dbd28, #ffe600);
-      text-align: center;
-      padding: 8px;
-      font-weight: bold;
-      font-size: 20px;
-      color: #000;
-    }
-  </style>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Карта найкращих перевірених пропозицій у Київському регіоні</title>
+    <link rel="stylesheet" href="https://unpkg.com/leaflet@1.9.3/dist/leaflet.css" />
+    <style>
+        body { font-family: Arial, sans-serif; margin: 0; padding: 0; }
+        .header {
+            display: flex;
+            align-items: center;
+            background: linear-gradient(90deg, #0057B7 0%, #FFD700 100%);
+            color: white; padding: 10px 20px;
+        }
+        .contact {
+            display: flex; align-items: center;
+        }
+        .contact span {
+            font-size: 20px; font-weight: bold; margin-right: 15px;
+        }
+        .contact a { margin-right: 10px; display: flex; align-items: center; }
+        .contact img { width: 28px; height: 28px; }
+        .main-title {
+            flex: 1; text-align: center; font-size: 22px; font-weight: bold; text-shadow: 1px 1px 4px #33333355;
+        }
+        .benefits {
+            background: #e4f5ff;
+            margin: 0; padding: 20px 0;
+        }
+        .benefits-title { font-size: 20px; font-weight: bold; margin-bottom: 10px; }
+        .benefits-list { list-style: none; padding: 0; margin: 0 auto; max-width: 800px; text-align: left;}
+        .benefits-list li { font-size: 18px; margin-bottom: 6px;}
+        #map { width: 100%; height: 70vh; }
+        @media (max-width: 700px) {
+            .main-title { font-size: 16px; }
+            .contact span { font-size: 14px; }
+            .benefits-title, .benefits-list li { font-size: 15px; }
+        }
+    </style>
+    <script src="https://unpkg.com/leaflet@1.9.3/dist/leaflet.js"></script>
 </head>
 <body>
-  <div class="top-bar">
-    <span>+380 68 715 59 96</span>
-    <a href="https://t.me/AILandUA" target="_blank"><img class="icon" src="https://cdn-icons-png.flaticon.com/512/2111/2111646.png" alt="Telegram" /></a>
-    <a href="tel:+380687155996"><img class="icon" src="https://cdn-icons-png.flaticon.com/512/126/126341.png" alt="Телефон" /></a>
-    <a href="viber://chat?number=%2B972509193033"><img class="icon" src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="Viber" /></a>
-    <a href="https://wa.me/972509193033" target="_blank"><img class="icon" src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp" /></a>
-  </div>
+    <div class="header">
+        <div class="contact">
+            <span>+380 68 715 59 96</span>
+            <a href="tel:+380687155996"><img src="https://cdn-icons-png.flaticon.com/512/724/724664.png" alt="Телефон"></a>
+            <a href="https://t.me/AILandHUB" target="_blank"><img src="https://upload.wikimedia.org/wikipedia/commons/8/82/Telegram_logo.svg" alt="Telegram"></a>
+            <a href="https://wa.me/972509193033" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733585.png" alt="WhatsApp"></a>
+            <a href="viber://chat?number=+972509193033" target="_blank"><img src="https://cdn-icons-png.flaticon.com/512/733/733579.png" alt="Viber"></a>
+        </div>
+        <div class="main-title">Карта найкращих перевірених пропозицій у Київському регіоні до 100 км від Києва</div>
+    </div>
+    <div class="benefits">
+        <div class="benefits-title">Чому обирають нас?</div>
+        <ul class="benefits-list">
+            <li>✅ Кожна ділянка перевірена особисто</li>
+            <li>✅ Природна перевага або локаційна "фішка"</li>
+            <li>✅ Найкраща ціна на ринку</li>
+            <li>✅ Можливість купити з будинком або без</li>
+            <li>✅ Підтримка на кожному етапі — від перегляду до угоди</li>
+        </ul>
+    </div>
+    <div id="map"></div>
+    <script>
+        // Стандартная иконка — участок
+        const landIcon = new L.Icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/854/854878.png', // "Листик" или обычный пин
+            iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -35]
+        });
+        // Иконка домика
+        const houseIcon = new L.Icon({
+            iconUrl: 'https://cdn-icons-png.flaticon.com/512/3107/3107350.png',
+            iconSize: [38, 38], iconAnchor: [19, 38], popupAnchor: [0, -35]
+        });
 
-  <div class="headline">
-    Карта найкращих перевірених пропозицій у Київському регіоні до 100 км від Києва
-  </div>
+        var map = L.map('map').setView([50.4501, 30.5234], 9);
 
-  <div id="map"></div>
+        L.tileLayer('https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png', {
+            attribution: '&copy; OpenStreetMap contributors'
+        }).addTo(map);
 
-  <script
-    src="https://unpkg.com/leaflet@1.9.4/dist/leaflet.js"
-    integrity="sha256-o9N1j7kG+nMWz1pniWcHkGZK8lFtF8jYTGtmC2Bci2M="
-    crossorigin=""
-  ></script>
-  <script>
-    const map = L.map("map").setView([50.3, 30.3], 9);
+        var plots = [
+            // Участки без дома
+            { coords: [49.818339, 30.991579], name: "Очеретяне", price: "$4,900", size: "0.52 га", distance: "60 км", link: "https://sites.google.com/view/zelenky-35", visible: true, type: "land" },
+            { coords: [49.844932, 30.341834], name: "Мала Антонівка", price: "$5,000", size: "0.50 га", distance: "74 км", link: "https://sites.google.com/view/malaantonivka/", visible: true, type: "land" },
+            // Дома/участки с домом
+            { coords: [49.858071, 30.354294], name: "Мала Антонівка з Хатою", price: "$6,900", size: "0.31 га", distance: "74 км", link: "https://sites.google.com/view/mala-antonivka-hata", visible: true, type: "house" },
+            // Добавь остальные по аналогии!
+        ];
 
-    L.tileLayer("https://{s}.tile.openstreetmap.org/{z}/{x}/{y}.png", {
-      maxZoom: 19,
-      attribution: '&copy; <a href="https://openstreetmap.org">OpenStreetMap</a> contributors'
-    }).addTo(map);
-
-    const markers = [
-      {
-        visible: true,
-        type: "house",
-        coords: [50.038, 30.866],
-        title: "Участок с домом",
-        desc: "Будинок + сад, Мала Антонівка, 25 соток. $7000",
-        url: "https://your-link.com"
-      },
-      // Примеры скрытых объектов
-      ...Array.from({ length: 14 }, (_, i) => ({
-        visible: false,
-        type: i < 10 ? "land" : "house",
-        coords: [50 + Math.random() * 0.5, 30 + Math.random() * 0.5],
-        title: `Объект ${i + 2}`,
-        desc: `Опис ${i + 2}`,
-        url: "#"
-      }))
-    ];
-
-    const icons = {
-      land: L.icon({
-        iconUrl: "https://cdn-icons-png.flaticon.com/512/684/684908.png",
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-        popupAnchor: [0, -30]
-      }),
-      house: L.icon({
-        iconUrl: "https://cdn-icons-png.flaticon.com/512/69/69407.png",
-        iconSize: [30, 30],
-        iconAnchor: [15, 30],
-        popupAnchor: [0, -30]
-      })
-    };
-
-    markers.forEach(({ visible, type, coords, title, desc, url }) => {
-      if (!visible) return;
-      const marker = L.marker(coords, { icon: icons[type] });
-      marker.bindPopup(`
-        <b>${title}</b><br>${desc}<br>
-        <a href="${url}" target="_blank">Перейти</a>
-      `);
-      marker.addTo(map);
-    });
-  </script>
+        plots.forEach(plot => {
+            if (plot.visible) {
+                let icon = plot.type === "house" ? houseIcon : landIcon;
+                let marker = L.marker(plot.coords, { icon }).addTo(map);
+                marker.bindPopup(`
+                    <b>${plot.name}</b><br>
+                    Ціна: ${plot.price}<br>
+                    Площа: ${plot.size}<br>
+                    Відстань до Києва: ${plot.distance}<br>
+                    <a href="${plot.link}" target="_blank">Докладніше</a>
+                `);
+                if (window.innerWidth > 768) {
+                    marker.on('mouseover', function () { this.openPopup(); });
+                    marker.on('mouseout', function () { setTimeout(() => { this.closePopup(); }, 1000); });
+                }
+            }
+        });
+    </script>
 </body>
 </html>
